@@ -1,27 +1,39 @@
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTutoringStore } from '../store/tutoringStore';
+import { useQuery } from '@tanstack/react-query';
+import { getSessions, getBookings } from '../api/client';
+import { useUIStore } from '../store/uiStore';
 import { CourseCard } from '../components/CourseCard';
 import { usePrevious } from '../hooks/useCustomHooks';
 
 export const SessionsPage = () => {
   const {
-    sessions,
-    bookings,
-    loading,
-    error,
     searchQuery,
     showOnlyAvailable,
     isCompactVariant,
     setSearchQuery,
     toggleAvailableOnly,
-    triggerSimulatedError,
-    fetchMockData,
-  } = useTutoringStore();
+  } = useUIStore();
 
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const previousSearchQuery = usePrevious<string>(searchQuery);
+
+  const {
+    data: sessions = [],
+    isLoading: isSessionsLoading,
+    isError: isSessionsError,
+    error: sessionsError,
+    refetch,
+  } = useQuery({
+    queryKey: ['sessions'],
+    queryFn: getSessions,
+  });
+
+  const { data: bookings = [] } = useQuery({
+    queryKey: ['bookings'],
+    queryFn: getBookings,
+  });
 
   const focusSearchInput = (): void => {
     if (searchInputRef.current) {
@@ -77,20 +89,11 @@ export const SessionsPage = () => {
 
             <button
               type="button"
-              onClick={triggerSimulatedError}
-              className="px-3 py-2.5 text-xs font-semibold rounded-xl bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/60 hover:bg-rose-100 transition-colors"
-              title="Test styled error state component"
-            >
-              ⚠️ Sim Error
-            </button>
-
-            <button
-              type="button"
-              onClick={fetchMockData}
+              onClick={() => refetch()}
               className="px-3 py-2.5 text-xs font-semibold rounded-xl bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/60 hover:bg-sky-100 transition-colors"
-              title="Reload mock data"
+              title="Refetch queries via React Query"
             >
-              🔄 Reset
+              🔄 Refetch API
             </button>
           </div>
         </div>
@@ -118,7 +121,7 @@ export const SessionsPage = () => {
         </div>
       </section>
 
-      {loading ? (
+      {isSessionsLoading ? (
         <section className="space-y-6">
           <div className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center space-y-4">
             <div className="relative w-12 h-12">
@@ -126,32 +129,32 @@ export const SessionsPage = () => {
             </div>
             <div className="space-y-1">
               <h3 className="font-bold text-slate-800 dark:text-slate-200 text-base">
-                Loading Peer Tutoring Data...
+                Fetching Sessions via React Query...
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Fetching tutoring sessions from Zustand store...
+                Communicating with JSON server endpoint /sessions...
               </p>
             </div>
           </div>
         </section>
-      ) : error ? (
+      ) : isSessionsError ? (
         <section className="p-8 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 shadow-sm text-center space-y-4 max-w-2xl mx-auto my-8">
           <div className="w-14 h-14 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 flex items-center justify-center mx-auto text-2xl shadow-inner">
             ⚠️
           </div>
           <div className="space-y-2">
             <h3 className="text-lg font-bold text-rose-900 dark:text-rose-200">
-              Tutoring Session Loading Error
+              API Connection Failure
             </h3>
             <p className="text-sm text-rose-700 dark:text-rose-300 leading-relaxed">
-              {error}
+              {sessionsError instanceof Error ? sessionsError.message : 'Failed to fetch sessions from server.'}
             </p>
           </div>
           <button
-            onClick={fetchMockData}
+            onClick={() => refetch()}
             className="px-5 py-2.5 text-xs font-bold rounded-xl bg-rose-600 text-white hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-600 transition-colors shadow-md inline-flex items-center space-x-2"
           >
-            <span>🔄 Retry Loading Data</span>
+            <span>🔄 Retry API Query</span>
           </button>
         </section>
       ) : (

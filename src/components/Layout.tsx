@@ -1,10 +1,10 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { useTutoringStore } from '../store/tutoringStore';
+import { useUIStore } from '../store/uiStore';
 
 export const Layout = () => {
   const { logout, token } = useAuthStore();
-  const { isDarkMode, toggleDarkMode, isCompactVariant, toggleCompactVariant } = useTutoringStore();
+  const { isDarkMode, toggleDarkMode, isCompactVariant, toggleCompactVariant } = useUIStore();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -31,7 +31,7 @@ export const Layout = () => {
                     Peer Tutoring Platform
                   </h1>
                   <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
-                    Router & Zustand
+                    React Query & JSON Server
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -121,7 +121,7 @@ export const Layout = () => {
       <footer className="py-8 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center text-xs text-slate-500 dark:text-slate-400 mt-auto">
         <div className="max-w-7xl mx-auto px-4">
           <p>
-            Peer Tutoring Booking Platform • Built with React 19, TypeScript, React Router 7, Zustand & Tailwind CSS
+            Peer Tutoring Booking Platform • Built with React 19, TypeScript, React Router 7, Zustand, React Query & JSON Server
           </p>
         </div>
       </footer>

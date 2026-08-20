@@ -1,17 +1,52 @@
 import { useState, type FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useTutoringStore } from '../store/tutoringStore';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getSessionById, getUsers, getBookings, createBooking } from '../api/client';
+import { useUIStore } from '../store/uiStore';
 import { SubmissionBadge } from '../components/SubmissionBadge';
 import { UserCard } from '../components/UserCard';
+import { BookingStatus } from '../types';
 
 export const SessionDetailPage = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [bookingNotes, setBookingNotes] = useState<string>('');
 
-  const { sessions, users, bookings, createBooking, isCompactVariant } = useTutoringStore();
+  const { isCompactVariant } = useUIStore();
 
-  const session = sessions.find((s) => s.id === sessionId);
+  // 1. URL-keyed useQuery call
+  const {
+    data: session,
+    isLoading: isSessionLoading,
+    isError: isSessionError,
+    error: sessionError,
+  } = useQuery({
+    queryKey: ['session', sessionId],
+    queryFn: () => getSessionById(sessionId!),
+    enabled: !!sessionId,
+  });
+
+  // 2. Auxiliary useQuery calls
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: getUsers,
+  });
+
+  const { data: bookings = [] } = useQuery({
+    queryKey: ['bookings'],
+    queryFn: getBookings,
+  });
+
+  // 3. useMutation with invalidateQueries in onSuccess
+  const bookingMutation = useMutation({
+    mutationFn: createBooking,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      setBookingNotes('');
+    },
+  });
+
   const tutor = session ? users.find((u) => u.id === session.tutorId) : undefined;
   const sessionBookings = bookings.filter((b) => b.sessionId === sessionId);
 
@@ -19,23 +54,40 @@ export const SessionDetailPage = () => {
 
   const handleBookingSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (session) {
-      createBooking(session, bookingNotes);
-      setBookingNotes('');
-    }
+    if (!session) return;
+
+    bookingMutation.mutate({
+      sessionId: session.id,
+      tuteeId: 103,
+      tutorId: session.tutorId,
+      status: BookingStatus.REQUESTED,
+      requestedAt: new Date().toISOString(),
+      notes: bookingNotes.trim() || 'No additional notes provided.',
+    });
   };
 
   const handleBackNavigation = () => {
     navigate('/sessions');
   };
 
-  if (!session) {
+  if (isSessionLoading) {
+    return (
+      <div className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-4 max-w-xl mx-auto my-12">
+        <div className="w-10 h-10 border-4 border-sky-200 border-t-sky-600 rounded-full animate-spin mx-auto"></div>
+        <p className="text-xs text-slate-500">Loading session details via URL param query...</p>
+      </div>
+    );
+  }
+
+  if (isSessionError || !session) {
     return (
       <div className="p-8 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-center space-y-4 max-w-xl mx-auto my-12">
         <div className="text-4xl">🔎</div>
         <h2 className="text-xl font-bold text-amber-900 dark:text-amber-200">Session Not Found</h2>
         <p className="text-xs text-amber-700 dark:text-amber-300">
-          No tutoring session matched the URL parameter: <code className="font-mono bg-amber-100 dark:bg-amber-900/60 px-1.5 py-0.5 rounded">{sessionId}</code>
+          {sessionError instanceof Error
+            ? sessionError.message
+            : `No tutoring session matched the URL parameter: ${sessionId}`}
         </p>
         <button
           onClick={handleBackNavigation}
@@ -59,7 +111,7 @@ export const SessionDetailPage = () => {
         </button>
 
         <span className="px-2.5 py-1 text-xs font-mono rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-          URL Param: {sessionId}
+          useParams Key: {sessionId}
         </span>
       </div>
 
@@ -111,7 +163,7 @@ export const SessionDetailPage = () => {
         <div className="lg:col-span-5 space-y-6">
           <section className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3">
-              Request Peer Booking
+              Request Peer Booking (POST Mutation)
             </h3>
 
             <form onSubmit={handleBookingSubmit} className="space-y-3">
@@ -127,10 +179,20 @@ export const SessionDetailPage = () => {
               />
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs transition-colors shadow-sm"
+                disabled={bookingMutation.isPending}
+                className="w-full py-2.5 rounded-lg bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white font-semibold text-xs transition-colors shadow-sm flex items-center justify-center space-x-2"
               >
-                Book This Session
+                {bookingMutation.isPending ? (
+                  <span>Saving Booking...</span>
+                ) : (
+                  <span>Book This Session (useMutation)</span>
+                )}
               </button>
+              {bookingMutation.isSuccess && (
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold text-center">
+                  ✓ Booking posted successfully! Query cache invalidated.
+                </p>
+              )}
             </form>
           </section>
 

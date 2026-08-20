@@ -1,11 +1,29 @@
 import { useState } from 'react';
-import { useTutoringStore } from '../store/tutoringStore';
+import { useQuery } from '@tanstack/react-query';
+import { getUsers, getBookings, getSubmissions } from '../api/client';
+import { useUIStore } from '../store/uiStore';
 import { UserCard } from '../components/UserCard';
 import { SubmissionBadge } from '../components/SubmissionBadge';
 import type { User } from '../types';
 
 export const DirectoryPage = () => {
-  const { users, bookings, submissions, isCompactVariant } = useTutoringStore();
+  const { isCompactVariant } = useUIStore();
+
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: getUsers,
+  });
+
+  const { data: bookings = [] } = useQuery({
+    queryKey: ['bookings'],
+    queryFn: getBookings,
+  });
+
+  const { data: submissions = [] } = useQuery({
+    queryKey: ['submissions'],
+    queryFn: getSubmissions,
+  });
+
   const [selectedUser, setSelectedUser] = useState<User | null>(users.length > 0 ? users[0] : null);
 
   const activeVariant = isCompactVariant ? 'compact' : 'default';
