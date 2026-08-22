@@ -1,4 +1,26 @@
 {
+  "courses": [
+    {
+      "id": "ITELECT4",
+      "title": "IT Elective 4: Advanced Web Development",
+      "description": "3 units · 1st Semester 2026-2027 · Covers React 19, TypeScript, Zustand, and React Query."
+    },
+    {
+      "id": "CSSWENG",
+      "title": "Software Engineering",
+      "description": "3 units · 1st Semester 2026-2027 · Software lifecycle, design patterns, and agile methodologies."
+    },
+    {
+      "id": "CS102",
+      "title": "Data Structures & Algorithms",
+      "description": "3 units · 1st Semester 2026-2027 · Stacks, queues, trees, graphs and complexity analysis."
+    },
+    {
+      "id": "WEB201",
+      "title": "Web Development Fundamentals",
+      "description": "3 units · 1st Semester 2026-2027 · HTML, CSS, responsive design, and modern layouts."
+    }
+  ],
   "sessions": [
     {
       "id": "SESS-001",

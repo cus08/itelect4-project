@@ -5,6 +5,9 @@ import LoginPage from './pages/LoginPage';
 import SessionsPage from './pages/SessionsPage';
 import SessionDetailPage from './pages/SessionDetailPage';
 import DirectoryPage from './pages/DirectoryPage';
+import CoursesPage from './pages/CoursesPage';
+import CourseDetailPage from './pages/CourseDetailPage';
+import SubmissionsPage from './pages/SubmissionsPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
@@ -18,6 +21,10 @@ function App() {
           <Route path="sessions" element={<SessionsPage />} />
           <Route path="sessions/:sessionId" element={<SessionDetailPage />} />
           <Route path="directory" element={<DirectoryPage />} />
+          {/* ── new routes ── */}
+          <Route path="courses" element={<CoursesPage />} />
+          <Route path="courses/:courseId" element={<CourseDetailPage />} />
+          <Route path="submissions" element={<SubmissionsPage />} />
         </Route>
       </Route>
 

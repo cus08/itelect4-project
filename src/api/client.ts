@@ -1,7 +1,8 @@
-import type { TutoringSession, Booking, User, Submission } from '../types';
+import type { TutoringSession, Booking, User, Submission, Course } from '../types';
 
 export type CreateBookingApiDto = Omit<Booking, 'id'>;
 export type CreateSessionApiDto = Omit<TutoringSession, 'id'>;
+export type CreateSubmissionApiDto = Omit<Submission, 'id'>;
 
 const API_BASE = 'http://localhost:3001';
 
@@ -39,4 +40,20 @@ export async function getUsers(): Promise<User[]> {
 
 export async function getSubmissions(): Promise<Submission[]> {
   return request<Submission[]>('/submissions');
+}
+
+export async function createSubmission(data: CreateSubmissionApiDto): Promise<Submission> {
+  return request<Submission>('/submissions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getCourses(): Promise<Course[]> {
+  return request<Course[]>('/courses');
+}
+
+export async function getCourseById(id: string): Promise<Course> {
+  return request<Course>(`/courses/${id}`);
 }

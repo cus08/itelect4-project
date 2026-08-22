@@ -65,7 +65,31 @@ export const Layout = () => {
                 }`
               }
             >
-              ⭐ Featured Session
+              ⭐ Featured
+            </NavLink>
+            <NavLink
+              to="/courses"
+              className={({ isActive }) =>
+                `px-3 py-1.5 rounded-lg font-medium transition-all ${
+                  isActive
+                    ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`
+              }
+            >
+              🎓 Courses
+            </NavLink>
+            <NavLink
+              to="/submissions"
+              className={({ isActive }) =>
+                `px-3 py-1.5 rounded-lg font-medium transition-all ${
+                  isActive
+                    ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`
+              }
+            >
+              📝 Submissions
             </NavLink>
             <NavLink
               to="/directory"
