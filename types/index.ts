@@ -41,8 +41,11 @@ export interface TutoringSession {
 export interface Submission {
   id: number;
   courseId: string;
+  courseCode?: string;
   studentId: number;
   grade?: number;
+  repoUrl?: string;
+  submittedAt?: string;
 }
 
 export interface Booking {

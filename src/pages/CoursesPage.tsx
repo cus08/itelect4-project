@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { getCourses } from '../api/client';
 import { useUIStore } from '../store/uiStore';
 import type { Course } from '../types';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 // ── tiny skeleton card ──────────────────────────────────────────────────────
 const CourseSkeletonCard = () => (
@@ -85,23 +87,24 @@ export const CoursesPage = () => {
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
               🔍
             </div>
-            <input
+            <Input
               id="courses-search"
               type="text"
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-slate-100 transition-all"
+              className="pl-10 h-10"
               placeholder="Search by course code or title (e.g. ITELECT, Web Dev)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={() => refetch()}
-            className="px-3 py-2.5 text-xs font-semibold rounded-xl bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/60 hover:bg-sky-100 transition-colors"
+            className="h-10"
             title="Refetch from JSON server"
           >
             🔄 Refetch
-          </button>
+          </Button>
         </div>
       </section>
 

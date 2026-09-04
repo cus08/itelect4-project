@@ -1,6 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('marcus@dlsl.edu.ph');
@@ -33,38 +36,39 @@ export const LoginPage = () => {
 
         <form onSubmit={handleLoginSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300 block">Email Address</label>
-            <input
+            <Label htmlFor="email" className="text-foreground">Email Address</Label>
+            <Input
+              id="email"
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all"
               placeholder="user@dlsl.edu.ph"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300 block">Password</label>
-            <input
+            <Label htmlFor="password" className="text-foreground">Password</Label>
+            <Input
+              id="password"
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all"
               placeholder="••••••••"
             />
           </div>
 
-          <button
+          <Button
             type="submit"
-            className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center space-x-2"
+            disabled={!email || !password}
+            className="w-full"
           >
             <span>Sign In to Dashboard</span>
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
-          </button>
+          </Button>
         </form>
 
         <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-700/60 text-center text-xs text-slate-400 space-y-1">

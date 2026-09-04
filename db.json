@@ -137,19 +137,25 @@
       "id": "301",
       "courseId": "ITELECT4",
       "studentId": 103,
-      "grade": 96
+      "grade": 96,
+      "repoUrl": "https://github.com/juan/itelect4-project",
+      "submittedAt": "2026-08-15T08:30:00.000Z"
     },
     {
       "id": "302",
       "courseId": "CS102",
       "studentId": 103,
-      "grade": 88
+      "grade": 88,
+      "repoUrl": "https://github.com/alex/dsa-trees",
+      "submittedAt": "2026-08-16T09:15:00.000Z"
     },
     {
       "id": "303",
       "courseId": "WEB201",
       "studentId": 103,
-      "grade": 92
+      "grade": 92,
+      "repoUrl": "https://github.com/alex/web-fundamentals",
+      "submittedAt": "2026-08-17T11:45:00.000Z"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
