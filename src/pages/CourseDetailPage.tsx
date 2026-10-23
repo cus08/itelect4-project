@@ -4,7 +4,8 @@ import { getCourseById, getSessions, getSubmissions } from '../api/client';
 import { SubmissionBadge } from '../components/SubmissionBadge';
 
 export const CourseDetailPage = () => {
-  const { courseId } = useParams<{ courseId: string }>();
+  const params = useParams<{ courseId?: string; code?: string }>();
+  const courseCode = params.code || params.courseId;
   const navigate = useNavigate();
 
   // Each courseId gets its own cache entry: ['course', 'CSSWENG'] vs ['course', 'ITELECT4']
@@ -14,9 +15,9 @@ export const CourseDetailPage = () => {
     isError,
     error,
   } = useQuery({
-    queryKey: ['course', courseId],
-    queryFn: () => getCourseById(courseId!),
-    enabled: !!courseId,
+    queryKey: ['course', courseCode],
+    queryFn: () => getCourseById(courseCode!),
+    enabled: !!courseCode,
   });
 
   const { data: sessions = [] } = useQuery({
@@ -29,15 +30,15 @@ export const CourseDetailPage = () => {
     queryFn: getSubmissions,
   });
 
-  const relatedSessions = sessions.filter((s) => s.courseCode === courseId);
-  const relatedSubmissions = submissions.filter((s) => s.courseId === courseId);
+  const relatedSessions = sessions.filter((s) => s.courseCode === courseCode);
+  const relatedSubmissions = submissions.filter((s) => (s.courseCode || s.courseId) === courseCode);
 
   if (isLoading) {
     return (
       <div className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-4 max-w-xl mx-auto my-12">
         <div className="w-10 h-10 border-4 border-sky-200 border-t-sky-600 rounded-full animate-spin mx-auto" />
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          Fetching course <code className="font-mono text-sky-600 dark:text-sky-400">{courseId}</code> …
+          Fetching course <code className="font-mono text-sky-600 dark:text-sky-400">{courseCode}</code> …
         </p>
       </div>
     );
@@ -51,7 +52,7 @@ export const CourseDetailPage = () => {
         <p className="text-sm text-amber-700 dark:text-amber-300 font-mono leading-relaxed">
           {error instanceof Error
             ? error.message
-            : `No course matched the code: ${courseId}`}
+            : `No course matched the code: ${courseCode}`}
         </p>
         <button
           onClick={() => navigate('/courses')}
@@ -76,7 +77,7 @@ export const CourseDetailPage = () => {
         </button>
 
         <span className="px-2.5 py-1 text-xs font-mono rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-          Cache key: {JSON.stringify(['course', courseId])}
+          Cache key: {JSON.stringify(['course', courseCode])}
         </span>
       </div>
 
@@ -84,13 +85,13 @@ export const CourseDetailPage = () => {
       <section className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
         <div>
           <span className="inline-block px-3 py-1 text-xs font-bold rounded-md bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 mb-3 uppercase tracking-wider">
-            {course.id}
+            {course.code || course.id}
           </span>
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
             {course.title}
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-            {course.description}
+            {course.description || (course.units ? `${course.units} units · ${course.semester}` : course.semester || '')}
           </p>
         </div>
 

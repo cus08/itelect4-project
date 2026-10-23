@@ -50,8 +50,10 @@ const mockSubmissions: Submission[] = [
   {
     id: 101,
     courseId: 'ITELECT4',
+    courseCode: 'ITELECT4',
     studentId: 2,
     grade: 95,
+    repoUrl: 'https://github.com/example/itelect4',
   },
 ];
 

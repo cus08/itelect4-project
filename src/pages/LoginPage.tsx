@@ -1,83 +1,106 @@
-import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useNavigate, Link } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import useAuthStore from "../store/authStore";
+import { loginUser } from "../api/client";
+import { loginSchema } from "../schemas/authSchema";
+import type { LoginFormValues } from "../schemas/authSchema";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-export const LoginPage = () => {
-  const [email, setEmail] = useState('marcus@dlsl.edu.ph');
-  const [password, setPassword] = useState('password123');
-  const { login } = useAuthStore();
+function LoginPage() {
+  const setSession = useAuthStore((state) => state.setSession);
   const navigate = useNavigate();
 
-  const handleLoginSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) return;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    mode: "onBlur",
+    defaultValues: { email: "", password: "" },
+  });
 
-    const generatedToken = `token_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    login(generatedToken);
-    
-    navigate('/sessions');
+  // The same useMutation the submissions form uses. Logging in is a
+  // POST that changes something on the server, so it is a mutation
+  // and not a query.
+  const logIn = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (reply) => {
+      // The token came from the API this time. The store just keeps it.
+      setSession(reply.token, reply.user.name);
+      navigate("/submissions");
+    },
+  });
+
+  const onSubmit = (values: LoginFormValues): void => {
+    logIn.mutate(values);
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-slate-800 border border-slate-700 rounded-2xl shadow-xl p-8 space-y-6">
-        <div className="text-center space-y-2">
-          <div className="w-14 h-14 bg-gradient-to-tr from-sky-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg text-white">
-            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-extrabold tracking-tight">Peer Tutoring Portal</h2>
-          <p className="text-xs text-slate-400">Sign in to access peer tutoring sessions & bookings</p>
+    <div className="max-w-sm mx-auto">
+      <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Login</h2>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+        <div className="grid gap-1.5">
+          <Label htmlFor="email" className="text-foreground">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            {...register("email")}
+            aria-invalid={errors.email ? true : undefined}
+            placeholder="juan@dlsl.edu.ph"
+          />
+          {errors.email && (
+            <p className="text-sm text-red-600">{errors.email.message}</p>
+          )}
         </div>
 
-        <form onSubmit={handleLoginSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-foreground">Email Address</Label>
-            <Input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="user@dlsl.edu.ph"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="password" className="text-foreground">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-            />
-          </div>
-
-          <Button
-            type="submit"
-            disabled={!email || !password}
-            className="w-full"
-          >
-            <span>Sign In to Dashboard</span>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </Button>
-        </form>
-
-        <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-700/60 text-center text-xs text-slate-400 space-y-1">
-          <p className="font-semibold text-slate-300">Demo Mode Active</p>
-          <p>Submitting this form authenticates via <code className="text-sky-400 font-mono">useAuthStore</code> Zustand store.</p>
+        <div className="grid gap-1.5">
+          <Label htmlFor="password" className="text-foreground">
+            Password
+          </Label>
+          {/* type="password" does two things: hides the characters as
+          they are typed, and keeps the value out of autofill
+          history. */}
+          <Input
+            id="password"
+            type="password"
+            {...register("password")}
+            aria-invalid={errors.password ? true : undefined}
+          />
+          {errors.password && (
+            <p className="text-sm text-red-600">{errors.password.message}</p>
+          )}
         </div>
-      </div>
+
+        <Button
+          type="submit"
+          disabled={logIn.isPending}
+          className="justify-self-start"
+        >
+          {logIn.isPending ? "Signing in..." : "Log In"}
+        </Button>
+      </form>
+
+      {/* The API's own sentence, not one written here. A wrong password
+      and an unknown email both produce "Email or password is
+      incorrect" -- deliberately the same message for both. */}
+      {logIn.isError && (
+        <p className="mt-4 text-sm text-red-700">{logIn.error.message}</p>
+      )}
+
+      <p className="mt-6 text-sm text-gray-600 dark:text-gray-400">
+        No account yet?{" "}
+        <Link to="/register" className="font-semibold text-blue-600">
+          Register
+        </Link>
+      </p>
     </div>
   );
-};
+}
 
 export default LoginPage;

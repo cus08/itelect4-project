@@ -45,13 +45,7 @@ export function SubmissionsPage() {
 
   // handleSubmit only calls this after the schema passes.
   const onSubmit = (values: SubmissionFormValues): void => {
-    addSubmission.mutate({
-      studentId: 103,
-      courseId: values.courseCode,
-      courseCode: values.courseCode,
-      repoUrl: values.repoUrl,
-      submittedAt: new Date().toISOString(),
-    });
+    addSubmission.mutate(values);
   };
 
   if (isLoading) {
@@ -86,11 +80,14 @@ export function SubmissionsPage() {
               className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
               <option value="">Select a course...</option>
-              {courses.data?.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.id} – {c.title}
-                </option>
-              ))}
+              {courses.data?.map((c) => {
+                const code = c.code || c.id;
+                return (
+                  <option key={code} value={code}>
+                    {code} – {c.title}
+                  </option>
+                );
+              })}
             </select>
             {errors.courseCode && (
               <p className="text-sm text-red-600 dark:text-red-400">

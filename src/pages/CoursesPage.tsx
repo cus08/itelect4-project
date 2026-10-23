@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getCourses } from '../api/client';
+import { getCourses, API_URL } from '../api/client';
 import { useUIStore } from '../store/uiStore';
 import type { Course } from '../types';
 import { Input } from '@/components/ui/input';
@@ -17,41 +17,46 @@ const CourseSkeletonCard = () => (
 );
 
 // ── single course card ──────────────────────────────────────────────────────
-const CourseCard = ({ course, onClick }: { course: Course; onClick: () => void }) => (
-  <div
-    onClick={onClick}
-    className="group relative flex flex-col justify-between p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm cursor-pointer hover:-translate-y-0.5 hover:shadow-md hover:border-sky-400 dark:hover:border-sky-600 transition-all duration-200"
-  >
-    <div>
-      <div className="flex items-center justify-between gap-2 mb-3">
-        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-sky-100 text-sky-800 dark:bg-sky-950/80 dark:text-sky-300 dark:border dark:border-sky-800/60 uppercase tracking-wider">
-          {course.id}
-        </span>
-        <span className="text-xs text-slate-400 dark:text-slate-500 font-mono">
-          → details
-        </span>
+const CourseCard = ({ course, onClick }: { course: Course; onClick: () => void }) => {
+  const code = course.code || course.id || "";
+  const description = course.description || (course.units ? `${course.units} units · ${course.semester || ''}` : course.semester || '');
+
+  return (
+    <div
+      onClick={onClick}
+      className="group relative flex flex-col justify-between p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm cursor-pointer hover:-translate-y-0.5 hover:shadow-md hover:border-sky-400 dark:hover:border-sky-600 transition-all duration-200"
+    >
+      <div>
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-sky-100 text-sky-800 dark:bg-sky-950/80 dark:text-sky-300 dark:border dark:border-sky-800/60 uppercase tracking-wider">
+            {code}
+          </span>
+          <span className="text-xs text-slate-400 dark:text-slate-500 font-mono">
+            → details
+          </span>
+        </div>
+
+        <h3 className="font-bold text-slate-900 dark:text-slate-100 text-lg leading-snug group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors mb-2">
+          {course.title}
+        </h3>
+
+        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2">
+          {description}
+        </p>
       </div>
 
-      <h3 className="font-bold text-slate-900 dark:text-slate-100 text-lg leading-snug group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors mb-2">
-        {course.title}
-      </h3>
-
-      <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2">
-        {course.description}
-      </p>
+      <div className="pt-3 mt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+        <span className="flex items-center space-x-1">
+          <span>🎓</span>
+          <span>View Course Details</span>
+        </span>
+        <span className="font-mono text-[11px] text-slate-400 dark:text-slate-500">
+          Code: {code}
+        </span>
+      </div>
     </div>
-
-    <div className="pt-3 mt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-      <span className="flex items-center space-x-1">
-        <span>🎓</span>
-        <span>View Course Details</span>
-      </span>
-      <span className="font-mono text-[11px] text-slate-400 dark:text-slate-500">
-        ID: {course.id}
-      </span>
-    </div>
-  </div>
-);
+  );
+};
 
 // ── page ────────────────────────────────────────────────────────────────────
 export const CoursesPage = () => {
@@ -69,13 +74,21 @@ export const CoursesPage = () => {
     queryFn: getCourses,
   });
 
+  // ===== SESSION 10: name the host it actually tried ===================
+  if (isError) {
+    return (
+      <div className="rounded-lg bg-red-50 p-4 text-red-700">
+        {error.message} -- tried {API_URL}/api/courses
+      </div>
+    );
+  }
+
   const filtered = courses.filter((c) => {
     const q = searchQuery.toLowerCase();
-    return (
-      c.id.toLowerCase().includes(q) ||
-      c.title.toLowerCase().includes(q) ||
-      c.description.toLowerCase().includes(q)
-    );
+    const code = (c.code || c.id || "").toLowerCase();
+    const title = (c.title || "").toLowerCase();
+    const desc = (c.description || c.semester || "").toLowerCase();
+    return code.includes(q) || title.includes(q) || desc.includes(q);
   });
 
   return (
@@ -101,7 +114,7 @@ export const CoursesPage = () => {
             variant="outline"
             onClick={() => refetch()}
             className="h-10"
-            title="Refetch from JSON server"
+            title="Refetch from API"
           >
             🔄 Refetch
           </Button>
@@ -119,26 +132,6 @@ export const CoursesPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((n) => <CourseSkeletonCard key={n} />)}
           </div>
-        </section>
-      ) : isError ? (
-        <section className="p-8 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 shadow-sm text-center space-y-4 max-w-2xl mx-auto my-8">
-          <div className="w-14 h-14 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 flex items-center justify-center mx-auto text-2xl shadow-inner">
-            ⚠️
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-lg font-bold text-rose-900 dark:text-rose-200">
-              API Connection Failure
-            </h3>
-            <p className="text-sm text-rose-700 dark:text-rose-300 leading-relaxed font-mono">
-              {error instanceof Error ? error.message : 'Failed to fetch courses from server.'}
-            </p>
-          </div>
-          <button
-            onClick={() => refetch()}
-            className="px-5 py-2.5 text-xs font-bold rounded-xl bg-rose-600 text-white hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-600 transition-colors shadow-md inline-flex items-center space-x-2"
-          >
-            <span>🔄 Retry</span>
-          </button>
         </section>
       ) : (
         <section className="space-y-4">
@@ -165,13 +158,16 @@ export const CoursesPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  course={course}
-                  onClick={() => navigate(`/courses/${course.id}`)}
-                />
-              ))}
+              {filtered.map((course) => {
+                const code = course.code || course.id || "";
+                return (
+                  <CourseCard
+                    key={code}
+                    course={course}
+                    onClick={() => navigate(`/courses/${code}`)}
+                  />
+                );
+              })}
             </div>
           )}
         </section>
