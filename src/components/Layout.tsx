@@ -55,6 +55,10 @@ export const Layout = () => {
             <NavLink to="/submissions" className={linkClass}>
               📝 Submissions
             </NavLink>
+            {/* Session 11: the one page that talks to Gemini */}
+            <NavLink to="/review" className={linkClass}>
+              🤖 AI Review
+            </NavLink>
             <NavLink to="/sessions" className={linkClass}>
               📚 Sessions
             </NavLink>
