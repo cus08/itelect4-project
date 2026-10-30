@@ -1,76 +1,70 @@
-# Peer Tutoring Booking Platform
+# itelect4-project
 
-A web platform connecting peer tutors with tutees for academic guidance, session scheduling, and booking management.
+[![CI](https://github.com/cus08/itelect4-project/actions/workflows/ci.yml/badge.svg)](https://github.com/cus08/itelect4-project/actions/workflows/ci.yml)
 
----
+A React + Vite tutoring and course submission platform connecting peer tutors with tutees for academic guidance, session scheduling, booking management, and AI project reviews.
 
-## 📌 Project Concept & Architecture
-
-The **Peer Tutoring Booking Platform** allows students to find peer tutors, browse scheduled tutoring sessions by subject, and manage session bookings with real-time status updates and AI-assisted topic/session description generation.
-
-### Core Domain Entities
-1. **User**: Represents participants with a role field (`tutor`, `tutee`, or `admin`).
-2. **TutoringSession / Course**: Represents offered peer tutoring sessions, including topic details, course codes, and tutor assignments.
-3. **Booking**: Represents a tutee's booking request for a session with a multi-step lifecycle enum (`requested` → `confirmed` → `completed` / `cancelled`).
+- **Frontend repo:** https://github.com/cus08/itelect4-project
+- **Backend repo:** https://github.com/cus08/itelect4-backend
+- **Live Frontend:** https://itelect4-project.vercel.app
+- **Live API:** https://itelect4-backend.vercel.app/api/health
 
 ---
 
-## 🚀 Module Feature Roadmap
+## 🏛️ Architecture
 
-| Requirement | Implementation Feature |
-| :--- | :--- |
-| **Auth Role/Type Field** | `UserRole` (`TUTOR`, `TUTEE`, `ADMIN`) powering Module 3 auth roles. |
-| **Multi-step Status Lifecycle** | `BookingStatus` (`REQUESTED` → `CONFIRMED` → `COMPLETED` / `CANCELLED`). |
-| **List-then-Detail Relationship** | Tutoring Sessions list → Session / Booking detail view for Module 3 routing. |
-| **Live Feature (Module 4)** | Live booking request counts & instant real-time booking status notifications. |
-| **Generative AI Feature (Module 5)** | AI-powered session description writer & AI tutor-tutee matching recommendations. |
-
----
-
-## 💻 TypeScript Implementation (GT1 Requirements)
-
-All TypeScript types and generic utilities are located in [`types/index.ts`](file:///c:/Users/Marcus%20Rodillo/Desktop/itelect4/types/index.ts) and [`src/types/index.ts`](file:///c:/Users/Marcus%20Rodillo/Desktop/itelect4/src/types/index.ts):
-
-- **Part 1 Entities & Domain Entities**: `User`, `Course`, `Submission`, `TutoringSession`, `Booking`.
-- **Enums**:
-  - `UserRole` (`tutor`, `tutee`, `admin`)
-  - `BookingStatus` (`requested`, `confirmed`, `completed`, `cancelled`)
-- **Generic Interface**: `ApiResponse<T>` with `status`, `data`, and optional `message`.
-- **Generic Functions**:
-  - `getById<T extends { id: string | number }>(items: T[], id: string | number): T | undefined`
-  - `getFirst<T>(items: T[]): T | undefined`
-- **Utility Types Used**:
-  - `Partial<User>` (`UpdateUserDto`)
-  - `Omit<Booking, "id">` (`CreateBookingDto`)
-  - `Pick<User, "id" | "name" | "role">` (`UserSummaryDto`)
-  - `Record<number, Booking>` (`BookingDictionary`)
+```mermaid
+flowchart LR
+  fe["itelect4-project<br/>React + Vite on Vercel"]
+  be["itelect4-backend<br/>Express on Vercel"]
+  db[("MongoDB Atlas")]
+  ai["Gemini API"]
+  fe -- "fetch + Bearer token" --> be
+  be -- "Mongoose" --> db
+  be -- "GEMINI_API_KEY" --> ai
+```
 
 ---
 
-## 🛠️ How to Run & Validate
+## 📌 Project Features
+- **Authentication**: JWT-based login and registration with Zod schema validation.
+- **Sessions & Bookings**: Browse peer tutoring sessions, request bookings, and manage statuses.
+- **Submissions**: Submit course repositories with grade indicators and submission badges.
+- **AI Reviews**: Integrated Gemini AI review to provide feedback on project descriptions.
+- **Automated Testing**: Comprehensive unit, component, and integration tests with Vitest and React Testing Library.
+
+---
+
+## 🛠️ How to Run Locally
 
 ### 1. Install Dependencies
 ```bash
 npm install
 ```
 
-### 2. Start Development Server
+### 2. Configure Environment
+Copy `.env.example` to `.env`:
+```bash
+VITE_API_URL=http://localhost:4000
+```
+
+### 3. Run Development Server
 ```bash
 npm run dev
 ```
 
-### 3. Type Checking (Zero Errors)
+### 4. Run Tests
 ```bash
-npx tsc --noEmit
+npm test
 ```
 
-### 4. Build Production Bundle
+### 5. Run Linter & Build
 ```bash
+npm run lint
 npm run build
 ```
 
 ---
 
-## 🏷️ Version Tag
-
-Tag name: `gt1`
+## 🤖 AI-Use Disclosure
+GitHub Copilot and Google Antigravity were used to assist in writing test specifications, boilerplate configuration, and code documentation under student supervision.
